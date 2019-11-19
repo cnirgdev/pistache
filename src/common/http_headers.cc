@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <unordered_map>
 #include <vector>
+#include <sstream>
 
 namespace Pistache {
 namespace Http {
@@ -43,10 +44,16 @@ toLowercase(std::string str) {
 
 bool
 LowercaseEqualStatic(const std::string& dynamic, const std::string& statik) {
-    return std::equal(dynamic.begin(), dynamic.end(), statik.begin(), statik.end(),
-        [] (const char& a, const char& b) {
-            return std::tolower(a) == b;
-        });
+  std::locale loc;
+  std::stringstream dss;
+  for ( size_t i = 0; i < dynamic.size(); i++ )
+    dss << std::tolower(dynamic[i], loc);
+
+  std::stringstream sss;
+  for ( size_t i = 0; i < statik.size(); i++ )
+    sss << std::tolower(statik[i], loc);
+
+  return (dss.str().compare(sss.str()) == 0);
 }
 
 Registry& Registry::instance() {
