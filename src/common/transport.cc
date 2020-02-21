@@ -89,7 +89,19 @@ Transport::onReady(const Aio::FdSet& fds) {
                 timers.erase(it->first);
             }
             else {
-                throw std::runtime_error("Unknown fd");
+                /*
+                * JJ: This case can happen when the application forks a process, which rg-sysinfo-ms
+                *     does. Pistache registers a file descriptor (fd) with epoll for each request and listens
+                *     for events for that fd. When finished, Pistache closes the fd which allows the OS to reassign
+                *     that same identifier to a new file. Closing a file unregisters the fd from the epoll list, unless
+                *     there are still references to it, even though the file is closed. When a process is forked, all the
+                *     open fds of the parent process are copied to the child process, so it is possible that the OS reassigns
+                *     the same fd of a previous request to a new file before it is removed from the epoll list. 
+                * 
+                *     This case is OK to drop, since it just means that there was a file notification for some fd that was never
+                *     registered by Pistache, thus no action should be taken for this event. 
+                */
+                // throw std::runtime_error("Unknown fd");
             }
 
         }
