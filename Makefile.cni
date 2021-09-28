@@ -1,14 +1,14 @@
 BUILD_DIR := $(abspath $(shell pwd)/build)
 LIB_PISTACHE := build/src/libpistache.a
 
-SDK_ROOT := $(abspath $(shell pwd)/../../otx-sdk-6.2.0)
 
-
-ifeq ($(PLATFORM), edge)
-        MARVELL_TOOLS_ROOT := $(SDK_ROOT)/marvell-tools-233.0
+ifneq (,$(filter $(PLATFORM),mce MCE MC-E))
+        OTX_SDK_ROOT := $(abspath $(shell pwd)/../otx-sdk-10-min)
+        MARVELL_TOOLS_ROOT := $(OTX_SDK_ROOT)/host/opt/ext-toolchain
         # compiler
         CXX := $(MARVELL_TOOLS_ROOT)/bin/aarch64-marvell-linux-gnu-g++
 endif
+
 
 all :$(LIB_PISTACHE)
 
