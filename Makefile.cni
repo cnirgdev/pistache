@@ -2,15 +2,25 @@ BUILD_DIR := $(abspath $(shell pwd)/build)
 LIB_PISTACHE := build/src/libpistache.a
 
 
+CMAKE_FLAGS := -DCMAKE_POSITION_INDEPENDENT_CODE=True
+#CMAKE_FLAGS += -DCMAKE_VERBOSE_MAKEFILE=y
 ifneq (,$(filter $(PLATFORM),mce MCE MC-E))
-        OTX_SDK_ROOT := $(abspath $(shell pwd)/../otx-sdk-10-min)
-        MARVELL_TOOLS_ROOT := $(OTX_SDK_ROOT)/host/opt/ext-toolchain
-        # compiler
-        CXX := $(MARVELL_TOOLS_ROOT)/bin/aarch64-marvell-linux-gnu-g++
+    override PLATFORM := MC-E
+    include $(OTX_SDK_ROOT)/cni-otx.mk  # OTX_ROOT must be passed in
+    CXX := $(OTX_SDK_ROOT)/$(OTX_CXX)
+    CMAKE_FLAGS += -D CMAKE_CXX_COMPILER=$(CXX)
+    CMAKE_FLAGS += -D CMAKE_CXX_COMPILER=$(CXX)
+else
+    override PLATFORM := MC-X
 endif
+
+$(info ===)
+$(info === Building libpistache for $(PLATFORM))
+$(info ===)
 
 
 all :$(LIB_PISTACHE)
+	@echo "libpistache build for $(PLATFORM): SUCCESS"
 
 git_submodules:
 	@echo "initializing git submodules"
@@ -18,7 +28,7 @@ git_submodules:
 
 $(LIB_PISTACHE) : git_submodules
 	mkdir -p {build,prefix}
-	cd build && CXX=$(CXX) cmake3 -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DPISTACHE_BUILD_EXAMPLES=false -DPISTACHE_BUILD_TESTS=false -DPISTACHE_BUILD_DOCS=false -DPISTACHE_USE_SSL=true -DCMAKE_INSTALL_PREFIX=$PWD/../prefix .. && make -j && make install
+	cd build && CXX=$(CXX) cmake3 $(CMAKE_FLAGS) -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DPISTACHE_BUILD_EXAMPLES=false -DPISTACHE_BUILD_TESTS=false -DPISTACHE_BUILD_DOCS=false -DPISTACHE_USE_SSL=true -DCMAKE_INSTALL_PREFIX=$(PWD)/../prefix .. && make -j && make install
 
 clean:
 	rm -rf build
