@@ -1,0 +1,40 @@
+#!/usr/bin/python3
+
+import sys
+from string import Template
+
+file_template = Template(
+"""
+[binaries]
+cpp = '$otx_sdk_root/host/opt/ext-toolchain/bin/aarch64-marvell-linux-gnu-g++'
+ar = '$otx_sdk_root/host/opt/ext-toolchain/bin/aarch64-marvell-linux-gnu-ar'
+strip = '$otx_sdk_root/host/opt/ext-toolchain/bin/aarch64-marvell-linux-gnu-strip'
+pkgconfig = 'pkg-config'
+exe_wrapper = 'qemu-aarch64'
+
+[host_machine]
+system = 'linux'
+cpu_family = 'aarch64'
+cpu = 'aarch64'
+endian = 'little'
+""")
+
+def main():
+  if len(sys.argv) != 3:
+    print('usage: ./build_cross_file <otx_sdk_root> <output_file>')
+    sys.exit(-1)
+
+  otx_sdk_root = sys.argv[1]
+  output_file  = sys.argv[2]
+  print(f'otx_sdk_root: {otx_sdk_root}')
+  print(f'output_file: {output_file}')
+
+  with open(output_file, 'w') as f:
+    content = file_template.substitute(otx_sdk_root=otx_sdk_root)
+    f.write(content)
+
+  print(f'meson cross file written to {output_file}')
+
+if __name__ == '__main__':
+  main()
+

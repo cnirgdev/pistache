@@ -35,7 +35,7 @@ if get_option('PISTACHE_USE_SSL')
 	add_project_arguments('-DPISTACHE_USE_SSL', language: 'cpp')
 endif
 
-libpistache = library(
+libpistache = static_library(
 	'pistache',
 	sources: pistache_common_src + pistache_server_src + pistache_client_src,
 	include_directories: incl_pistache,
