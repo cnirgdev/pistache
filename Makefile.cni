@@ -1,0 +1,32 @@
+LIB_PISTACHE := build/src/libpistache.a
+
+ifneq (,$(filter $(PLATFORM),mce MCE MC-E))
+    override PLATFORM := MC-E
+    include $(OTX_SDK_ROOT)/cni-otx.mk  # OTX_ROOT must be passed in
+    CROSS_FILE := $(abspath $(shell pwd)/meson-cross-mce.txt)
+    CROSS_CMD := --cross-file
+    CROSS_SCRIPT := $(abspath $(shell pwd)/build_cross_file)
+else
+    override PLATFORM := MC-X
+endif
+
+$(info ===)
+$(info === Building libpistache for $(PLATFORM))
+$(info ===)
+
+all :$(LIB_PISTACHE)
+	@echo "libpistache build for $(PLATFORM): SUCCESS"
+
+.PHONY: build_cross_file
+
+build_cross_file:
+ifneq (,$(filter $(PLATFORM),mce MCE MC-E))
+	$(CROSS_SCRIPT) $(OTX_SDK_ROOT) $(CROSS_FILE)
+endif
+
+$(LIB_PISTACHE): build_cross_file
+	meson setup build --buildtype=release -DPISTACHE_USE_SSL=false -DPISTACHE_BUILD_EXAMPLES=false -DPISTACHE_BUILD_TESTS=false -DPISTACHE_BUILD_DOCS=false -DPISTACHE_INSTALL=false $(CROSS_CMD) $(CROSS_FILE)
+	meson compile -C build/
+
+clean:
+	rm -rf build
